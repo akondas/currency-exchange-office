@@ -1,0 +1,23 @@
+name: ci
+
+on: [push,pull_request]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: "Installing PHP"
+      uses: "shivammathur/setup-php@v2"
+      with:
+        php-version: '8.4'
+        ini-values: memory_limit=-1
+        extensions: decimal
+
+    - name: "Install composer dependencies"
+      uses: "ramsey/composer-install@v3"
+
+    - name: Run composer ci script
+      run: composer ci
