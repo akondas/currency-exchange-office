@@ -1,12 +1,21 @@
 {
     "name": "akondas/currency-exchange-office",
-    "description": "Currency exchange office",
     "type": "project",
-    "require-dev": {
-        "phpunit/phpunit": "^11.5",
-        "php-cs-fixer/shim": "^3.67"
-    },
+    "description": "Currency exchange office",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Arkadiusz Kondas",
+            "email": "arkadiusz.kondas@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-decimal": "*"
+    },
+    "require-dev": {
+        "php-cs-fixer/shim": "^3.67",
+        "phpunit/phpunit": "^11.5"
+    },
     "autoload": {
         "psr-4": {
             "Akondas\\CurrencyExchangeOffice\\": "src/"
@@ -17,35 +26,26 @@
             "Tests\\Akondas\\CurrencyExchangeOffice\\": "tests/"
         }
     },
-    "authors": [
-        {
-            "name": "Arkadiusz Kondas",
-            "email": "arkadiusz.kondas@gmail.com"
-        }
-    ],
-    "require": {
-      "ext-decimal": "*"
-    },
     "scripts": {
-        "phpunit:unit": [
-            "phpunit --colors --testsuite unit"
-        ],
-        "code-style:fix": [
-            "PHP_CS_FIXER_FUTURE_MODE=1 php-cs-fixer fix --diff --ansi"
-        ],
-        "code-style:check": [
-            "PHP_CS_FIXER_FUTURE_MODE=1 php-cs-fixer fix --dry-run --diff --ansi"
-        ],
-        "phpstan": [
-            "phpstan analyze --ansi"
-        ],
-        "tests": [
-            "@phpunit:unit"
-        ],
         "ci": [
             "@composer validate",
             "@composer audit",
             "@code-style:check"
+        ],
+        "code-style:check": [
+            "PHP_CS_FIXER_FUTURE_MODE=1 php-cs-fixer fix --dry-run --diff --ansi"
+        ],
+        "code-style:fix": [
+            "PHP_CS_FIXER_FUTURE_MODE=1 php-cs-fixer fix --diff --ansi"
+        ],
+        "phpstan": [
+            "phpstan analyze --ansi"
+        ],
+        "phpunit:unit": [
+            "phpunit --colors --testsuite unit"
+        ],
+        "tests": [
+            "@phpunit:unit"
         ]
     }
 }
