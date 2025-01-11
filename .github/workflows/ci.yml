@@ -1,0 +1,21 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    container: akondas/currency-exchange-office
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: "Install composer dependencies"
+      uses: "ramsey/composer-install@v3"
+
+    - name: Run composer ci script
+      run: composer ci
