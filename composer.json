@@ -33,10 +33,10 @@
             "@code-style:check"
         ],
         "code-style:check": [
-            "PHP_CS_FIXER_FUTURE_MODE=1 php-cs-fixer fix --dry-run --diff --ansi"
+            "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --dry-run --diff --ansi"
         ],
         "code-style:fix": [
-            "PHP_CS_FIXER_FUTURE_MODE=1 php-cs-fixer fix --diff --ansi"
+            "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --diff --ansi"
         ],
         "phpstan": [
             "phpstan analyze --ansi"
