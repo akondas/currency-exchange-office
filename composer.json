@@ -14,7 +14,8 @@
     },
     "require-dev": {
         "php-cs-fixer/shim": "^3.67",
-        "phpunit/phpunit": "^11.5"
+        "phpunit/phpunit": "^11.5",
+        "phpstan/phpstan": "^2.1"
     },
     "autoload": {
         "psr-4": {
@@ -30,7 +31,9 @@
         "ci": [
             "@composer validate",
             "@composer audit",
-            "@code-style:check"
+            "@code-style:check",
+            "@phpstan",
+            "@tests"
         ],
         "code-style:check": [
             "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --dry-run --diff --ansi"

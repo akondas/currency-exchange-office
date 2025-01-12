@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 final class DailyLedgerTest extends TestCase
 {
     #[Test]
-    public function it_will_open_new_daily_ledger()
+    public function it_will_open_new_daily_ledger(): void
     {
         $ledger = DailyLedger::open([]);
 

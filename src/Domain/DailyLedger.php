@@ -13,6 +13,9 @@ final class DailyLedger
      */
     private array $recordedEvents = [];
 
+    /**
+     * @param array<MonetaryAmount> $ledgerEntries
+     */
     public static function open(array $ledgerEntries): self
     {
         $instance = new self();
