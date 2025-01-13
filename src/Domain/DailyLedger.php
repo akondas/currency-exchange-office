@@ -4,14 +4,24 @@ declare(strict_types=1);
 
 namespace Akondas\CurrencyExchangeOffice\Domain;
 
+use Akondas\CurrencyExchangeOffice\Domain\Event\CurrencyExchanged;
 use Akondas\CurrencyExchangeOffice\Domain\Event\DailyLedgerOpened;
 
 final class DailyLedger
 {
     /**
+     * @var array<string, MonetaryAmount>
+     */
+    private array $ledgerEntries = [];
+
+    /**
      * @var array<Event>
      */
     private array $recordedEvents = [];
+
+    private function __construct()
+    {
+    }
 
     /**
      * @param array<MonetaryAmount> $ledgerEntries
@@ -22,6 +32,15 @@ final class DailyLedger
         $instance->recordThat(new DailyLedgerOpened($ledgerEntries));
 
         return $instance;
+    }
+
+    public function exchange(MonetaryAmount $from, MonetaryAmount $to): void
+    {
+        if ($this->getAmount($to->currencyCode)->lessThan($to)) {
+            throw new \InvalidArgumentException(sprintf('Insufficient funds of %s', $to->currencyCode->value));
+        }
+
+        $this->recordThat(new CurrencyExchanged($from, $to));
     }
 
     /**
@@ -38,5 +57,33 @@ final class DailyLedger
     private function recordThat(Event $event): void
     {
         $this->recordedEvents[] = $event;
+        $this->apply($event);
+    }
+
+    private function apply(Event $event): void
+    {
+        match ($event::class) {
+            DailyLedgerOpened::class => $this->applyDailyLedgerOpened($event),
+            CurrencyExchanged::class => $this->applyCurrencyExchanged($event),
+            default => null,
+        };
+    }
+
+    private function applyDailyLedgerOpened(DailyLedgerOpened $event): void
+    {
+        foreach ($event->ledgerEntries as $entry) {
+            $this->ledgerEntries[$entry->currencyCode->value] = $entry;
+        }
+    }
+
+    private function applyCurrencyExchanged(CurrencyExchanged $event): void
+    {
+        $this->ledgerEntries[$event->from->currencyCode->value] = $this->getAmount($event->from->currencyCode)->add($event->from);
+        $this->ledgerEntries[$event->to->currencyCode->value] = $this->getAmount($event->to->currencyCode)->sub($event->to);
+    }
+
+    private function getAmount(CurrencyCode $currencyCode): MonetaryAmount
+    {
+        return $this->ledgerEntries[$currencyCode->value] ?? MonetaryAmount::fromString('0', $currencyCode);
     }
 }
