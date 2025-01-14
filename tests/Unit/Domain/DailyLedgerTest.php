@@ -48,10 +48,20 @@ final class DailyLedgerTest extends TestCase
     public function it_will_not_allow_to_exchange_money_if_there_is_no_sufficient_funds_from_the_beginning(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Insufficient funds of USD');
+        $this->expectExceptionMessage('Insufficient funds to deliver 4.00 USD');
 
         $ledger = DailyLedger::open([]);
         $ledger->exchange(MonetaryAmount::fromString('1.00', CurrencyCode::PLN), MonetaryAmount::fromString('4.00', CurrencyCode::USD));
+    }
+
+    #[Test]
+    public function it_will_not_allow_to_exchange_the_same_currency(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot exchange same currency');
+
+        $ledger = DailyLedger::open([]);
+        $ledger->exchange(MonetaryAmount::fromString('1.00', CurrencyCode::USD), MonetaryAmount::fromString('4.00', CurrencyCode::USD));
     }
 
     #[Test]
