@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Akondas\CurrencyExchangeOffice\Domain;
 
-enum CurrencyCode
+enum CurrencyCode: string
 {
-    public const string USD = 'USD';
-    public const string EUR = 'EUR';
-    public const string PLN = 'PLN';
+    case EUR = 'EUR';
+    case GBP = 'GBP';
+    case PLN = 'PLN';
+    case USD = 'USD';
 }
