@@ -69,6 +69,10 @@ final class MonetaryAmountTest extends TestCase
             ['20.00', '10.00', false],
             ['10.00', '10.00', false],
             ['10.00', '9.99', false],
+            ['10.001', '10.00', false],
+            ['0.00', '0.00', false],
+            ['-20.00', '-10.00', true],
+            ['-10.00', '-20.00', false],
         ];
     }
 }

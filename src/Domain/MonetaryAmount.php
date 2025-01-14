@@ -45,6 +45,11 @@ final readonly class MonetaryAmount
         return $this->amount->toString();
     }
 
+    public function toCurrencyString(): string
+    {
+        return sprintf('%s %s', $this->toDecimalString(), $this->currencyCode->value);
+    }
+
     private function assertCurrency(self $other, string $message): void
     {
         if ($this->currencyCode !== $other->currencyCode) {

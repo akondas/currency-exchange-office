@@ -36,8 +36,12 @@ final class DailyLedger
 
     public function exchange(MonetaryAmount $source, MonetaryAmount $target): void
     {
+        if ($source->currencyCode === $target->currencyCode) {
+            throw new \InvalidArgumentException('Cannot exchange same currency');
+        }
+
         if ($this->getAmount($target->currencyCode)->lessThan($target)) {
-            throw new \InvalidArgumentException(sprintf('Insufficient funds of %s', $target->currencyCode->value));
+            throw new \InvalidArgumentException(sprintf('Insufficient funds to deliver %s', $target->toCurrencyString()));
         }
 
         $this->recordThat(new CurrencyExchanged($source, $target));
