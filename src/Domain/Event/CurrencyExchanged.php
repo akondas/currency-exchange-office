@@ -10,8 +10,8 @@ use Akondas\CurrencyExchangeOffice\Domain\MonetaryAmount;
 final readonly class CurrencyExchanged implements Event
 {
     public function __construct(
-        public MonetaryAmount $from,
-        public MonetaryAmount $to,
+        public MonetaryAmount $source,
+        public MonetaryAmount $target,
     ) {
     }
 }
