@@ -8,6 +8,8 @@ enum CurrencyCode: string
 {
     case EUR = 'EUR';
     case GBP = 'GBP';
+    case JPY = 'JPY';
+    case KWD = 'KWD';
     case PLN = 'PLN';
     case USD = 'USD';
 }

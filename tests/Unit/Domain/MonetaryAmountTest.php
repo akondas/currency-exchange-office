@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Akondas\CurrencyExchangeOffice\Unit\Domain;
 
-use Akondas\CurrencyExchangeOffice\Domain\CurrencyCode;
+use Akondas\CurrencyExchangeOffice\Domain\Currency;
 use Akondas\CurrencyExchangeOffice\Domain\MonetaryAmount;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -17,8 +17,8 @@ final class MonetaryAmountTest extends TestCase
     #[Test]
     public function it_will_add_amount(): void
     {
-        $ten = MonetaryAmount::fromString('10.00', CurrencyCode::USD);
-        $twenty = MonetaryAmount::fromString('20.00', CurrencyCode::USD);
+        $ten = MonetaryAmount::fromString('10.00', Currency::USD());
+        $twenty = MonetaryAmount::fromString('20.00', Currency::USD());
 
         self::assertSame('30.00', $ten->add($twenty)->toDecimalString());
     }
@@ -28,15 +28,15 @@ final class MonetaryAmountTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        MonetaryAmount::fromString('10.00', CurrencyCode::USD)
-            ->add(MonetaryAmount::fromString('20.00', CurrencyCode::EUR));
+        MonetaryAmount::fromString('10.00', Currency::USD())
+            ->add(MonetaryAmount::fromString('20.00', Currency::EUR()));
     }
 
     #[Test]
     public function it_will_sub_amount(): void
     {
-        $thirty = MonetaryAmount::fromString('30.00', CurrencyCode::USD);
-        $ten = MonetaryAmount::fromString('10.00', CurrencyCode::USD);
+        $thirty = MonetaryAmount::fromString('30.00', Currency::USD());
+        $ten = MonetaryAmount::fromString('10.00', Currency::USD());
 
         self::assertSame('20.00', $thirty->sub($ten)->toDecimalString());
     }
@@ -46,16 +46,16 @@ final class MonetaryAmountTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        MonetaryAmount::fromString('10.00', CurrencyCode::USD)
-            ->sub(MonetaryAmount::fromString('20.00', CurrencyCode::EUR));
+        MonetaryAmount::fromString('10.00', Currency::USD())
+            ->sub(MonetaryAmount::fromString('20.00', Currency::EUR()));
     }
 
     #[Test]
     #[DataProvider('lessThanData')]
     public function it_will_allow_to_check_if_less_than(string $first, string $second, bool $result): void
     {
-        self::assertSame($result, MonetaryAmount::fromString($first, CurrencyCode::USD)
-            ->lessThan(MonetaryAmount::fromString($second, CurrencyCode::USD)));
+        self::assertSame($result, MonetaryAmount::fromString($first, Currency::USD())
+            ->lessThan(MonetaryAmount::fromString($second, Currency::USD())));
     }
 
     /**
@@ -74,5 +74,21 @@ final class MonetaryAmountTest extends TestCase
             ['-20.00', '-10.00', true],
             ['-10.00', '-20.00', false],
         ];
+    }
+
+    #[Test]
+    public function it_will_use_currency_decimal_places_when_casting_to_string(): void
+    {
+        self::assertSame('10.001', MonetaryAmount::fromString('10.0012', Currency::KWD())->toDecimalString());
+        self::assertSame('10.00', MonetaryAmount::fromString('10.001', Currency::USD())->toDecimalString());
+        self::assertSame('10', MonetaryAmount::fromString('10.001', Currency::JPY())->toDecimalString());
+    }
+
+    #[Test]
+    public function it_will_format_currency_string_with_proper_decimal_places(): void
+    {
+        self::assertSame('10.001 KWD', MonetaryAmount::fromString('10.0012', Currency::KWD())->toCurrencyString());
+        self::assertSame('10.00 USD', MonetaryAmount::fromString('10.001', Currency::USD())->toCurrencyString());
+        self::assertSame('10 JPY', MonetaryAmount::fromString('10.001', Currency::JPY())->toCurrencyString());
     }
 }
