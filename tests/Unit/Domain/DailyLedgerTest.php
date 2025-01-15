@@ -78,14 +78,19 @@ final class DailyLedgerTest extends TestCase
     }
 
     #[Test]
-    public function it_will_close_daily_ledger(): void
+    public function it_will_close_daily_ledger_with_balances(): void
     {
-        $ledger = DailyLedger::open([]);
+        $ledger = DailyLedger::open([
+            MonetaryAmount::fromString('100.00', CurrencyCode::USD),
+            MonetaryAmount::fromString('50.00', CurrencyCode::EUR),
+        ]);
         $ledger->popRecordedEvents();
 
         $ledger->close();
 
-        self::assertInstanceOf(DailyLedgerClosed::class, $ledger->popRecordedEvents()[0]);
+        $event = $ledger->popRecordedEvents()[0];
+        self::assertInstanceOf(DailyLedgerClosed::class, $event);
+        self::assertCount(2, $event->ledgerEntries);
     }
 
     #[Test]
