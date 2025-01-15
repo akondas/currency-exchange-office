@@ -83,4 +83,12 @@ final class MonetaryAmountTest extends TestCase
         self::assertSame('10.00', MonetaryAmount::fromString('10.001', Currency::USD())->toDecimalString());
         self::assertSame('10', MonetaryAmount::fromString('10.001', Currency::JPY())->toDecimalString());
     }
+
+    #[Test]
+    public function it_will_format_currency_string_with_proper_decimal_places(): void
+    {
+        self::assertSame('10.001 KWD', MonetaryAmount::fromString('10.0012', Currency::KWD())->toCurrencyString());
+        self::assertSame('10.00 USD', MonetaryAmount::fromString('10.001', Currency::USD())->toCurrencyString());
+        self::assertSame('10 JPY', MonetaryAmount::fromString('10.001', Currency::JPY())->toCurrencyString());
+    }
 }
