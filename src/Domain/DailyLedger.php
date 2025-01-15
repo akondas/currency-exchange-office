@@ -41,11 +41,11 @@ final class DailyLedger
     {
         $this->assertNotClosed();
 
-        if ($source->currencyCode === $target->currencyCode) {
+        if ($source->currency->equals($target->currency)) {
             throw new \InvalidArgumentException('Cannot exchange same currency');
         }
 
-        if ($this->getAmount($target->currencyCode)->lessThan($target)) {
+        if ($this->getAmount($target->currency)->lessThan($target)) {
             throw new \InvalidArgumentException(sprintf('Insufficient funds to deliver %s', $target->toCurrencyString()));
         }
 
@@ -89,14 +89,14 @@ final class DailyLedger
     private function applyDailyLedgerOpened(DailyLedgerOpened $event): void
     {
         foreach ($event->ledgerEntries as $entry) {
-            $this->ledgerEntries[$entry->currencyCode->value] = $entry;
+            $this->ledgerEntries[$entry->currency->code->value] = $entry;
         }
     }
 
     private function applyCurrencyExchanged(CurrencyExchanged $event): void
     {
-        $this->ledgerEntries[$event->source->currencyCode->value] = $this->getAmount($event->source->currencyCode)->add($event->source);
-        $this->ledgerEntries[$event->target->currencyCode->value] = $this->getAmount($event->target->currencyCode)->sub($event->target);
+        $this->ledgerEntries[$event->source->currency->code->value] = $this->getAmount($event->source->currency)->add($event->source);
+        $this->ledgerEntries[$event->target->currency->code->value] = $this->getAmount($event->target->currency)->sub($event->target);
     }
 
     private function applyDailyLedgerClosed(DailyLedgerClosed $event): void
@@ -104,9 +104,9 @@ final class DailyLedger
         $this->closed = true;
     }
 
-    private function getAmount(CurrencyCode $currencyCode): MonetaryAmount
+    private function getAmount(Currency $currency): MonetaryAmount
     {
-        return $this->ledgerEntries[$currencyCode->value] ?? MonetaryAmount::fromString('0', $currencyCode);
+        return $this->ledgerEntries[$currency->code->value] ?? MonetaryAmount::fromString('0', $currency);
     }
 
     private function assertNotClosed(): void

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Akondas\CurrencyExchangeOffice\Unit\Domain;
 
-use Akondas\CurrencyExchangeOffice\Domain\CurrencyCode;
+use Akondas\CurrencyExchangeOffice\Domain\Currency;
 use Akondas\CurrencyExchangeOffice\Domain\DailyLedger;
 use Akondas\CurrencyExchangeOffice\Domain\Event\CurrencyExchanged;
 use Akondas\CurrencyExchangeOffice\Domain\Event\DailyLedgerClosed;
@@ -28,10 +28,10 @@ final class DailyLedgerTest extends TestCase
     #[Test]
     public function it_will_exchange_money(): void
     {
-        $ledger = DailyLedger::open([MonetaryAmount::fromString('100.00', CurrencyCode::USD)]);
+        $ledger = DailyLedger::open([MonetaryAmount::fromString('100.00', Currency::USD())]);
         $ledger->popRecordedEvents();
 
-        $ledger->exchange(MonetaryAmount::fromString('10.00', CurrencyCode::PLN), MonetaryAmount::fromString('40.00', CurrencyCode::USD));
+        $ledger->exchange(MonetaryAmount::fromString('10.00', Currency::PLN()), MonetaryAmount::fromString('40.00', Currency::USD()));
 
         self::assertInstanceOf(CurrencyExchanged::class, $ledger->popRecordedEvents()[0]);
     }
@@ -41,8 +41,8 @@ final class DailyLedgerTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $ledger = DailyLedger::open([MonetaryAmount::fromString('100.00', CurrencyCode::USD)]);
-        $ledger->exchange(MonetaryAmount::fromString('40.00', CurrencyCode::PLN), MonetaryAmount::fromString('160.00', CurrencyCode::USD));
+        $ledger = DailyLedger::open([MonetaryAmount::fromString('100.00', Currency::USD())]);
+        $ledger->exchange(MonetaryAmount::fromString('40.00', Currency::PLN()), MonetaryAmount::fromString('160.00', Currency::USD()));
     }
 
     #[Test]
@@ -52,7 +52,7 @@ final class DailyLedgerTest extends TestCase
         $this->expectExceptionMessage('Insufficient funds to deliver 4.00 USD');
 
         $ledger = DailyLedger::open([]);
-        $ledger->exchange(MonetaryAmount::fromString('1.00', CurrencyCode::PLN), MonetaryAmount::fromString('4.00', CurrencyCode::USD));
+        $ledger->exchange(MonetaryAmount::fromString('1.00', Currency::PLN()), MonetaryAmount::fromString('4.00', Currency::USD()));
     }
 
     #[Test]
@@ -62,17 +62,17 @@ final class DailyLedgerTest extends TestCase
         $this->expectExceptionMessage('Cannot exchange same currency');
 
         $ledger = DailyLedger::open([]);
-        $ledger->exchange(MonetaryAmount::fromString('1.00', CurrencyCode::USD), MonetaryAmount::fromString('4.00', CurrencyCode::USD));
+        $ledger->exchange(MonetaryAmount::fromString('1.00', Currency::USD()), MonetaryAmount::fromString('4.00', Currency::USD()));
     }
 
     #[Test]
     public function it_will_exchange_money_which_were_obtained_during_the_day(): void
     {
-        $ledger = DailyLedger::open([MonetaryAmount::fromString('100.00', CurrencyCode::USD)]);
-        $ledger->exchange(MonetaryAmount::fromString('20.00', CurrencyCode::PLN), MonetaryAmount::fromString('80.00', CurrencyCode::USD));
+        $ledger = DailyLedger::open([MonetaryAmount::fromString('100.00', Currency::USD())]);
+        $ledger->exchange(MonetaryAmount::fromString('20.00', Currency::PLN()), MonetaryAmount::fromString('80.00', Currency::USD()));
         $ledger->popRecordedEvents();
 
-        $ledger->exchange(MonetaryAmount::fromString('2.00', CurrencyCode::GBP), MonetaryAmount::fromString('10.00', CurrencyCode::PLN));
+        $ledger->exchange(MonetaryAmount::fromString('2.00', Currency::GBP()), MonetaryAmount::fromString('10.00', Currency::PLN()));
 
         self::assertInstanceOf(CurrencyExchanged::class, $ledger->popRecordedEvents()[0]);
     }
@@ -81,8 +81,8 @@ final class DailyLedgerTest extends TestCase
     public function it_will_close_daily_ledger_with_balances(): void
     {
         $ledger = DailyLedger::open([
-            MonetaryAmount::fromString('100.00', CurrencyCode::USD),
-            MonetaryAmount::fromString('50.00', CurrencyCode::EUR),
+            MonetaryAmount::fromString('100.00', Currency::USD()),
+            MonetaryAmount::fromString('50.00', Currency::EUR()),
         ]);
         $ledger->popRecordedEvents();
 
@@ -114,6 +114,6 @@ final class DailyLedgerTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Daily ledger is already closed');
 
-        $ledger->exchange(MonetaryAmount::fromString('20.00', CurrencyCode::PLN), MonetaryAmount::fromString('80.00', CurrencyCode::USD));
+        $ledger->exchange(MonetaryAmount::fromString('20.00', Currency::PLN()), MonetaryAmount::fromString('80.00', Currency::USD()));
     }
 }
