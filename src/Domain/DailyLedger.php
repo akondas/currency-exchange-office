@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Akondas\CurrencyExchangeOffice\Domain;
 
 use Akondas\CurrencyExchangeOffice\Domain\Event\CurrencyExchanged;
+use Akondas\CurrencyExchangeOffice\Domain\Event\DailyLedgerClosed;
 use Akondas\CurrencyExchangeOffice\Domain\Event\DailyLedgerOpened;
 
 final class DailyLedger
@@ -13,6 +14,8 @@ final class DailyLedger
      * @var array<string, MonetaryAmount>
      */
     private array $ledgerEntries = [];
+
+    private bool $closed = false;
 
     /**
      * @var array<Event>
@@ -36,6 +39,8 @@ final class DailyLedger
 
     public function exchange(MonetaryAmount $source, MonetaryAmount $target): void
     {
+        $this->assertNotClosed();
+
         if ($source->currencyCode === $target->currencyCode) {
             throw new \InvalidArgumentException('Cannot exchange same currency');
         }
@@ -45,6 +50,13 @@ final class DailyLedger
         }
 
         $this->recordThat(new CurrencyExchanged($source, $target));
+    }
+
+    public function close(): void
+    {
+        $this->assertNotClosed();
+
+        $this->recordThat(new DailyLedgerClosed($this->ledgerEntries));
     }
 
     /**
@@ -69,6 +81,7 @@ final class DailyLedger
         match ($event::class) {
             DailyLedgerOpened::class => $this->applyDailyLedgerOpened($event),
             CurrencyExchanged::class => $this->applyCurrencyExchanged($event),
+            DailyLedgerClosed::class => $this->applyDailyLedgerClosed($event),
             default => null,
         };
     }
@@ -86,8 +99,20 @@ final class DailyLedger
         $this->ledgerEntries[$event->target->currencyCode->value] = $this->getAmount($event->target->currencyCode)->sub($event->target);
     }
 
+    private function applyDailyLedgerClosed(DailyLedgerClosed $event): void
+    {
+        $this->closed = true;
+    }
+
     private function getAmount(CurrencyCode $currencyCode): MonetaryAmount
     {
         return $this->ledgerEntries[$currencyCode->value] ?? MonetaryAmount::fromString('0', $currencyCode);
+    }
+
+    private function assertNotClosed(): void
+    {
+        if ($this->closed) {
+            throw new \LogicException('Daily ledger is already closed');
+        }
     }
 }

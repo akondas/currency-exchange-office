@@ -7,6 +7,7 @@ namespace Tests\Akondas\CurrencyExchangeOffice\Unit\Domain;
 use Akondas\CurrencyExchangeOffice\Domain\CurrencyCode;
 use Akondas\CurrencyExchangeOffice\Domain\DailyLedger;
 use Akondas\CurrencyExchangeOffice\Domain\Event\CurrencyExchanged;
+use Akondas\CurrencyExchangeOffice\Domain\Event\DailyLedgerClosed;
 use Akondas\CurrencyExchangeOffice\Domain\Event\DailyLedgerOpened;
 use Akondas\CurrencyExchangeOffice\Domain\MonetaryAmount;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -74,5 +75,45 @@ final class DailyLedgerTest extends TestCase
         $ledger->exchange(MonetaryAmount::fromString('2.00', CurrencyCode::GBP), MonetaryAmount::fromString('10.00', CurrencyCode::PLN));
 
         self::assertInstanceOf(CurrencyExchanged::class, $ledger->popRecordedEvents()[0]);
+    }
+
+    #[Test]
+    public function it_will_close_daily_ledger_with_balances(): void
+    {
+        $ledger = DailyLedger::open([
+            MonetaryAmount::fromString('100.00', CurrencyCode::USD),
+            MonetaryAmount::fromString('50.00', CurrencyCode::EUR),
+        ]);
+        $ledger->popRecordedEvents();
+
+        $ledger->close();
+
+        $event = $ledger->popRecordedEvents()[0];
+        self::assertInstanceOf(DailyLedgerClosed::class, $event);
+        self::assertCount(2, $event->ledgerEntries);
+    }
+
+    #[Test]
+    public function it_will_check_if_ledger_is_already_closed(): void
+    {
+        $ledger = DailyLedger::open([]);
+        $ledger->close();
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Daily ledger is already closed');
+
+        $ledger->close();
+    }
+
+    #[Test]
+    public function it_will_not_allow_to_exchange_if_ledger_is_closed(): void
+    {
+        $ledger = DailyLedger::open([]);
+        $ledger->close();
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Daily ledger is already closed');
+
+        $ledger->exchange(MonetaryAmount::fromString('20.00', CurrencyCode::PLN), MonetaryAmount::fromString('80.00', CurrencyCode::USD));
     }
 }
